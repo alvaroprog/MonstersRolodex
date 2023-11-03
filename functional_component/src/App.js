@@ -1,47 +1,38 @@
-import './App.css';
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import SearchBox from './components/search-box/search-box.component';
 import CardList from './components/card-list/card-list.component';
 
-class App extends Component {
+import './App.css';
 
-  constructor() {
-    super();
+const App = () => {
 
-    this.state = {
-      monsters: [],
-      searchField: ''
-    };
-  }
+  const [monsters, setMonsters] = useState([]);
+  const [filteredMonsters, setFilteredMonsters] = useState([]);
+  const [searchField, setSearchField] = useState('');
 
-  componentDidMount() {
+  useEffect(() => {
     fetch("https://jsonplaceholder.typicode.com/users")
       .then((response) => response.json())
-      .then((monstersList) => this.setState(() => {
-        return {monsters: monstersList}
-      }));
-  }
+      .then((monstersList) => setMonsters(monstersList));
+  }, []);
 
-  onChangeHandler = (event) => {
+  useEffect(() => {
+    const filteredMonstersList = monsters.filter((monster) => monster.name.toLocaleLowerCase().includes(searchField));
+    setFilteredMonsters(filteredMonstersList);
+  }, [monsters, searchField]);
+
+  const onChangeHandler = (event) => {
     const searchField = event.target.value.toLocaleLowerCase();
-    this.setState(() => {
-      return {searchField};
-    })
+    setSearchField(searchField);
   }
 
-  render() {
-    const { monsters, searchField } = this.state;
-    const { onChangeHandler } = this;
-    const filteredMonsters = monsters.filter((monster) => monster.name.toLocaleLowerCase().includes(searchField));
-
-    return (
-      <div className='App'>
-        <h1 className='app-title'>Monsters Rolodex</h1>
-        <SearchBox className='search-box' placeholder='Find a monster' onChangeHandler={onChangeHandler} />
-        <CardList monsters={filteredMonsters} />
-      </div>
-    )
-  }
+  return (
+    <div className='App'>
+      <h1 className='app-title'>Monsters Rolodex</h1>
+      <SearchBox className='search-box' placeholder='Find a monster' onChangeHandler={onChangeHandler} />
+      <CardList monsters={filteredMonsters} />
+    </div>
+  )
 }
 
 export default App;
